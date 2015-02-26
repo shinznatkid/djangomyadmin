@@ -1,0 +1,10 @@
+<div style="text-align: center; margin: 0 10px 5px 10px;">
+    <div class="list-group flat" style="text-align: left;">
+        <h3>{{ database_name }}</h3>
+        {% for table in tables %}
+            <div class="list-group-item small">
+                <a href="{% url 'djangomyadmin.page_table_structure' database_name table %}" data-target="body"><span class="glyphicon glyphicon-th-list" aria-hidden="true" style="font-size: 12px;"></span></a> <a href="{% url 'djangomyadmin.page_table' database_name table %}" data-target="body">{{ table }}</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>

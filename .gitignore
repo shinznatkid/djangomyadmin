@@ -1,0 +1,6 @@
+*.pyc
+*.sqlite3
+secrets.json
+/media/*
+.project
+.pydevproject

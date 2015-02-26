@@ -1,0 +1,51 @@
+{% load static %}
+<div class="sub-menu">
+    <ul class="nav-menu">
+        <li><a href="{% url 'djangomyadmin.page_table' database_name table_name %}" data-target="body">Browse</a></li>
+        <li><a href="{% url 'djangomyadmin.page_table_structure' database_name table_name %}" class="active" data-target="body">Structure</a></li>
+        <li><a href="#" data-target="body">Export</a></li>
+        <li><a href="#" data-target="body">Import</a></li>
+        <li><a href="#" data-target="body">Operation</a></li>
+    </ul>
+</div>
+<div class="inner-body">
+    
+    <div class="rows">
+        <div class="col-sm-12">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Collation</th>
+                        <th>Null</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for column in columns %}
+                        <tr>
+                            <td align="center">
+                                <input type="checkbox" name="selected_tbl[]"> 
+                                <a href="#"><span class="glyphicon glyphicon-edit"></span></a> 
+                                <a href="#"><span class="glyphicon glyphicon-trash"></span></a>
+                            </td>
+                            <td>{{ column }}</td>
+                            <td>{{ column.column_type }}</td>
+                            <td>{{ column.collation_name|default:'' }}</td>
+                            <td>{{ column.is_nullable }}</td>
+                            <td>{% if column.is_nullable == 'NO' and not column.column_default %}<i style="color: #555">None</i>{% else %}{{ column.column_default|default_if_none:'<i>NULL</i>' }}{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('#collationSelect').chosen();
+        setBreadcrumb('{{ database_name}}', '{{ table_name }}');
+    });
+</script>

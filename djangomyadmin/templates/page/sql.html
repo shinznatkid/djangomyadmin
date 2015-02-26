@@ -1,0 +1,63 @@
+{% load static %}
+<div class="sub-menu">
+    <ul class="nav-menu">
+        <li><a href="{% url 'djangomyadmin.page_table' database_name table_name %}" class="active" data-target="body">Browse</a></li>
+        <li><a href="{% url 'djangomyadmin.page_table_structure' database_name table_name %}" data-target="body">Structure</a></li>
+        <li><a href="#" data-target="body">Export</a></li>
+        <li><a href="#" data-target="body">Import</a></li>
+        <li><a href="#" data-target="body">Operation</a></li>
+    </ul>
+</div>
+<div class="inner-body">
+
+    <div class="rows">
+        <div class="col-sm-12">
+            <div class="alert alert-success" role="alert">Showing rows {{ pos }} - {{ pos_end }} ( {{ count }} total , Query took {{ query_time_usage }} sec)</div>
+        </div>
+    </div>
+
+    <div class="rows">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-body">{{ query }}</div>
+                <div class="panel-footer" style="text-align: right">[<a href="#">Edit</a>]</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rows">
+        <div class="col-sm-12">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {% for column in columns %}
+                            <th>{{ column }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td align="center">
+                                <input type="checkbox" name="selected_tbl[]"> 
+                                <a href="#"><span class="glyphicon glyphicon-edit"></span></a> 
+                                <a href="#"><span class="glyphicon glyphicon-trash"></span></a>
+                            </td>
+                            {% for value in record %}
+                                <td>{{ value }}</td>    
+                            {% endfor %}
+                            
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('#collationSelect').chosen();
+        setBreadcrumb('{{ database_name}}', '{{ table_name }}');
+    });
+</script>

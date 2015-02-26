@@ -1,0 +1,77 @@
+<style>
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        margin-top: 50px;
+        border-right: 1px solid #e8e8e8;
+        box-shadow: none;
+        background: #fff;
+        z-index: 100;
+        width: 230px;
+        height: auto;
+        max-height: 100%;
+        visibility: visible;
+        opacity: 1;
+    }
+    .guide-section-separator {
+        margin: 8px 0;
+        border: 0;
+        border-bottom: 1px solid #e2e2e2;
+        list-style: none;
+        background: #ccc;
+    }
+    div.list-group.flat {
+        margin-bottom: 7px;
+    }
+    div.list-group.flat > .list-group-item {
+        border: 0;
+        border-radius: 0;
+    }
+    div.list-group.flat > h3 {
+        padding: 8px 15px;
+        color: #44B78B;
+        font-size: small;
+        font-weight: bold;
+        margin: 0;
+    }
+    .list-group-item a {
+        color: #555;
+    }
+    .list-group-item:focus, .list-group-item:hover {
+        color: #555;
+        text-decoration: none;
+        background-color: #f5f5f5;
+    }
+    div.list-group.flat > .list-group-item.small {
+        padding: 4px 15px;
+        font-size: small;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    div.list-group.flat > .list-group-item.small:hover {
+        overflow: visible;
+    }
+</style>
+
+<div id="sidebar" role="navigation">
+    <div style="text-align: center; margin: 20px 10px 0 10px;">
+        <div class="list-group flat" style="text-align: left;">
+            <a href="{% url 'djangomyadmin.index' %}" class="list-group-item"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> Home</a>
+            <a href="#" class="list-group-item"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> SQL</a>
+        </div>
+    </div>
+    <hr class="guide-section-separator">
+    <div id="sidebarBody">
+        <div style="text-align: center; margin: 0 10px 5px 10px;">
+            <div class="list-group flat" style="text-align: left;">
+                <h3>Databases</h3>
+                {% for database in databases %}
+                    <a href="{% url 'djangomyadmin.page_tables' database %}" class="list-group-item small" data-target="body"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span> {{ database }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

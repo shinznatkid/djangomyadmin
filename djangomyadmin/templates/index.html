@@ -1,0 +1,39 @@
+{% extends "dmabase.html" %}
+{% block container %}
+<div id="body" class="container-fluid">
+
+</div>
+{% endblock container %}
+{% block script %}
+<script>
+    function setBreadcrumb(database_name, table_name) {
+        $('ol.breadcrumb.menu li').remove();
+        $('ol.breadcrumb.menu').append('<li><a href="{% url "djangomyadmin.index" %}" data-target="body">Home</a></li>');
+        if(database_name !== undefined) {
+            var url = '{% url "djangomyadmin.page_tables" "0" %}'.replace('0', database_name);
+            $('ol.breadcrumb.menu').append('<li><a href="' + url + '" data-target="body">' + database_name + '</a></li>');
+        }
+        if(table_name !== undefined) {
+            var table_url = '{% url "djangomyadmin.page_tables" "0" %}'.replace('0', table_name);
+            $('ol.breadcrumb.menu').append('<li><a href="' + table_url + '" data-target="body">' + table_name + '</a></li>');
+        }
+    }
+    $(document).ready(function(){
+        var db_url = '{% url "djangomyadmin.page_databases" %}';
+        $.get(db_url, function(html){
+            $('#body').html(html);
+            $('#body').data('href', db_url);
+        });
+        $(document).on('click', 'a[data-target]', function(){
+            var target = $(this).data('target');
+            var href = $(this).attr('href');
+            $.get(href, function(html){
+                $('#'+target).html(html);
+                $('#'+target).data('href', href);
+            });
+            return false;
+        });
+        setBreadcrumb();
+    });
+</script>
+{% endblock script %}

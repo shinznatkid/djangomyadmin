@@ -1,0 +1,57 @@
+{% load static %}
+<div class="inner-body">
+    <div class="rows">
+        <div class="col-sm-6">
+            <h1>Tables</h1>
+        </div>
+        <div class="col-sm-6" style="margin-top: 21px; text-align: right;">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label class="sr-only" for="createTableName">Name</label>
+                    <input type="text" class="form-control" id="createTableName" placeholder="Table name">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="columnsTxt">Columns</label>
+                    <input type="text" class="form-control" id="columnsTxt" name="columns" />
+                </div>
+                <button type="submit" class="btn btn-default">Create</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="rows">
+        <div class="col-sm-12">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Table</th>
+                        <th>Action</th>
+                        <th>Type</th>
+                        <th>Collation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for table in tables %}
+                        <tr>
+                            <td align="center"><input type="checkbox" name="selected_tbl[]" value="{{ table }}"></td>
+                            <td><a href="{% url 'djangomyadmin.page_table' database_name table.table_name %}" data-target="body">{{ table.table_name }}</a></td>
+                            <td></td>
+                            <td>{{ table.engine }}</td>
+                            <td>{{ table.table_collation }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('#collationSelect').chosen();
+        $.get('{% url "djangomyadmin.sidebar_tables" database_name %}', function(html){
+            $('#sidebarBody').html(html);
+        });
+        setBreadcrumb('{{ database_name}}');
+    });
+</script>
