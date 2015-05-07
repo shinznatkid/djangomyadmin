@@ -22,12 +22,25 @@ def dblogin_required(view_func):
 @dblogin_required
 def index(request):
     username = request.session.get('username')
-    password = request.session.get('password')
+    password = request.session.get('password')    
+
     # if not username:
     #     return redirect('djangomyadmin.login')
+
     db = Database(username, password)
+
+    database_name = None
+    print request.POST
+    if request.POST:
+        database_name = request.POST.get('database_name')
+        collation = request.POST.get('collation')
+
+        if database_name:
+            db.create_databases(database_name, collation)
+
     data = {
         'databases': db.show_databases(),
+        'database_name': database_name,
     }
     return render(request, 'index.html', data)
 
@@ -61,7 +74,8 @@ def logout(request):
 def page_databases(request):
     username = request.session.get('username')
     password = request.session.get('password')
-    db = Database(username, password)
+
+    db = Database(username, password)    
     data = {
         'databases': db.show_databases(),
     }
@@ -70,6 +84,7 @@ def page_databases(request):
 
 @dblogin_required
 def page_tables(request, database_name):
+    print 'page_tables'
     username = request.session.get('username')
     password = request.session.get('password')
     db = Database(username, password, database_name)

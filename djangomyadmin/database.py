@@ -88,3 +88,12 @@ class Database(object):
                     new_record.append(str_x)
                 new_records.append(new_record)
             return new_records
+
+    def create_databases(self, database_name, collation=None):
+        if not collation:
+            collation = 'utf8_general_ci'
+
+        if database_name not in self.show_databases():
+            with self.connection.cursor() as cursor:
+                command = 'CREATE DATABASE IF NOT EXISTS {} COLLATE {}'.format(database_name, collation)
+                cursor.execute(command)

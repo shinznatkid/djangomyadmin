@@ -19,7 +19,11 @@
         }
     }
     $(document).ready(function(){
-        var db_url = '{% url "djangomyadmin.page_databases" %}';
+        {% if database_name %}
+            var db_url = '{% url 'djangomyadmin.page_tables' database_name %}';
+        {% else %}
+            var db_url = '{% url "djangomyadmin.page_databases" %}';
+        {% endif %}
         $.get(db_url, function(html){
             $('#body').html(html);
             $('#body').data('href', db_url);
