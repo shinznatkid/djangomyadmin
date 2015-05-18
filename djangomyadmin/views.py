@@ -1,12 +1,20 @@
-from django.shortcuts import render, redirect
-from .forms import LoginForm
-from django.conf import settings
-from .database import Database, InvalidUsernameorpassword
-from .models import *
-from django.http import HttpResponse
-from django.core.urlresolvers import resolve, reverse
+# -*- coding: utf-8 -*-
+
+import pkgutil
 import json
 import math
+import sys
+
+from django.views.generic.base import TemplateView
+from django.core.urlresolvers import resolve, reverse
+from django.utils.decorators import method_decorator
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.conf import settings
+
+from .models import Tables
+from .forms import LoginForm
+from .database import Database, InvalidUsernameorpassword
 
 
 def dblogin_required(view_func):
@@ -213,6 +221,7 @@ def page_table(request, database_name, table_name):
         else:
             count_str = '~%d' % count
 
+    ''' Pagination '''
     nav_current_page = int(math.floor(pos / max_rows)) + 1
     latest_page      = int(math.floor(count / max_rows)) + 1
     nav_prev_page     = None
@@ -263,6 +272,7 @@ def page_table_structure(request, database_name, table_name):
     return render(request, 'page/table_structure.html', data)
 
 
+@dblogin_required
 def sidebar_tables(request, database_name):
     username = request.session.get('username')
     password = request.session.get('password')
@@ -272,3 +282,76 @@ def sidebar_tables(request, database_name):
         'tables': db.show_tables(simple=True),
     }
     return render(request, 'sidebar/tables.html', data)
+
+
+class AjaxTemplateView(TemplateView):
+
+    @method_decorator(dblogin_required)
+    def dispatch(self, *args, **kwargs):
+        if self.request.is_ajax():
+            self.template_name = self.template_ajax_name
+        return super(AjaxTemplateView, self).dispatch(*args, **kwargs)
+
+
+class PageScriptsView(AjaxTemplateView):
+
+    template_name         = 'index.html'
+    template_ajax_name    = 'page/scripts.html'
+    template_success_name = 'page/success.html'
+    load_dir              = 'djangomyadminscripts'
+
+    def load_all_modules_from_dir(self, dirname):
+        modules = []
+        for importer, package_name, _ in pkgutil.iter_modules([dirname]):
+            full_package_name = '%s.%s' % (dirname, package_name)
+            if full_package_name not in sys.modules:
+                __import__(full_package_name)
+            module = sys.modules[full_package_name]
+            for key in dir(module):
+                if package_name.lower() == key.lower():
+                    modules.append(getattr(module, key))
+                    break
+        return modules
+
+    def get_context_data(self, **kwargs):
+        context = super(PageScriptsView, self).get_context_data(**kwargs)
+        context['template_ajax_name'] = self.template_ajax_name
+        return context
+
+    def dispatch(self, *args, **kwargs):
+        self.modules = self.load_all_modules_from_dir(self.load_dir)
+        username = self.request.session.get('username')
+        password = self.request.session.get('password')
+        self.db = Database(username, password)
+        return super(PageScriptsView, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        modules = [module() for module in self.modules]
+        return self.render_to_response(
+            self.get_context_data(
+                modules=modules,
+            )
+        )
+
+    def post(self, request, *args, **kwargs):
+        module_name = self.request.POST.get('module_name', None)
+        modules = []
+        check_module = None
+        for module in self.modules:
+            if module_name == module.name:
+                data_module = module(self.request.POST)
+                check_module = data_module
+            else:
+                data_module = module()
+            modules.append(data_module)
+
+        if check_module:
+            if check_module.entity.is_valid():
+                success = check_module.entity.execute(self.db)
+                if not success:
+                    return redirect('/')
+                self.template_ajax_name = self.template_success_name
+                return self.render_to_response(
+                    self.get_context_data(success=success,))
+        return self.render_to_response(
+            self.get_context_data(modules=modules,))

@@ -1,0 +1,11 @@
+{% load static %}
+{% load bootstrap3 %}
+<div class="inner-body">
+    <div class="alert alert-success" role="alert">{% autoescape off %}{{ success }}{% endautoescape  %}</div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('#collationSelect').chosen();
+        setBreadcrumb();
+    });
+</script>
