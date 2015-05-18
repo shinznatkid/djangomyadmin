@@ -5,9 +5,7 @@ import json
 import math
 import sys
 
-from django.views.generic.base import TemplateView
 from django.core.urlresolvers import resolve, reverse
-from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.conf import settings
@@ -15,6 +13,7 @@ from django.conf import settings
 from .models import Tables
 from .forms import LoginForm
 from .database import Database, InvalidUsernameorpassword
+from .genericviews import AjaxTemplateView
 
 
 def dblogin_required(view_func):
@@ -105,16 +104,23 @@ def logout(request):
     return redirect('djangomyadmin.login')
 
 
-@dblogin_required
-def page_databases(request):
-    username = request.session.get('username')
-    password = request.session.get('password')
+class PageDatabaseView(AjaxTemplateView):
 
-    db = Database(username, password)
-    data = {
-        'databases': db.show_databases(),
-    }
-    return render(request, 'page/databases.html', data)
+    template_name         = 'index.html'
+    template_ajax_name    = 'page/databases.html'
+
+    def dispatch(self, *args, **kwargs):
+        username = self.request.session.get('username')
+        password = self.request.session.get('password')
+        self.db = Database(username, password)
+        return super(PageDatabaseView, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.render_to_response(
+            self.get_context_data(
+                databases=self.db.show_databases(),
+            )
+        )
 
 
 @dblogin_required
@@ -284,15 +290,6 @@ def sidebar_tables(request, database_name):
     return render(request, 'sidebar/tables.html', data)
 
 
-class AjaxTemplateView(TemplateView):
-
-    @method_decorator(dblogin_required)
-    def dispatch(self, *args, **kwargs):
-        if self.request.is_ajax():
-            self.template_name = self.template_ajax_name
-        return super(AjaxTemplateView, self).dispatch(*args, **kwargs)
-
-
 class PageScriptsView(AjaxTemplateView):
 
     template_name         = 'index.html'
@@ -312,11 +309,6 @@ class PageScriptsView(AjaxTemplateView):
                     modules.append(getattr(module, key))
                     break
         return modules
-
-    def get_context_data(self, **kwargs):
-        context = super(PageScriptsView, self).get_context_data(**kwargs)
-        context['template_ajax_name'] = self.template_ajax_name
-        return context
 
     def dispatch(self, *args, **kwargs):
         self.modules = self.load_all_modules_from_dir(self.load_dir)
