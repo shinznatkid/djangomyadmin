@@ -3,6 +3,8 @@ from .forms import LoginForm
 from django.conf import settings
 from .database import Database, InvalidUsernameorpassword
 from .models import *
+from django.http import HttpResponse
+import json
 
 
 def dblogin_required(view_func):
@@ -19,24 +21,47 @@ def dblogin_required(view_func):
     return decorator
 
 
+def json_response(func):
+    """
+    A decorator thats takes a view response and turns it
+    into json. If a callback is added through GET or POST
+    the response is JSONP.
+    """
+    def decorator(request, *args, **kwargs):
+        objects = func(request, *args, **kwargs)
+        if isinstance(objects, HttpResponse):
+            return objects
+        try:
+            data = json.dumps(objects)
+            if 'callback' in request.REQUEST:
+                # a jsonp response!
+                data = '%s(%s);' % (request.REQUEST['callback'], data)
+                return HttpResponse(data, "text/javascript")
+        except:
+            data = json.dumps(str(objects))
+        return HttpResponse(data, "application/json")
+    return decorator
+
+
 @dblogin_required
 def index(request):
     username = request.session.get('username')
-    password = request.session.get('password')    
+    password = request.session.get('password')
 
     # if not username:
     #     return redirect('djangomyadmin.login')
 
-    db = Database(username, password)
-
     database_name = None
-    print request.POST
-    if request.POST:
-        database_name = request.POST.get('database_name')
-        collation = request.POST.get('collation')
 
-        if database_name:
-            db.create_databases(database_name, collation)
+    db = Database(username, password)
+    if request.POST:
+        if 'createDatabase' in request.POST:
+            database_name = request.POST.get('database_name')
+            collation = request.POST.get('collation')
+
+            if database_name:
+                db = Database(username, password)
+                db.create_databases(database_name, collation)
 
     data = {
         'databases': db.show_databases(),
@@ -75,7 +100,7 @@ def page_databases(request):
     username = request.session.get('username')
     password = request.session.get('password')
 
-    db = Database(username, password)    
+    db = Database(username, password)
     data = {
         'databases': db.show_databases(),
     }
@@ -93,6 +118,67 @@ def page_tables(request, database_name):
         'tables': db.show_tables(),
     }
     return render(request, 'page/tables.html', data)
+
+
+@dblogin_required
+def page_create_table(request, database_name):
+    print 'page_create_tables'
+    username = request.session.get('username')
+    password = request.session.get('password')
+    db = Database(username, password, database_name)
+
+    table_name = request.GET.get('table_name')
+    columns_num = request.GET.get('columns_num')
+
+    data = {
+        'database_name': database_name,
+        'table_name': table_name,
+        'columns_num': columns_num,
+    }
+    return render(request, 'page/create_table.html', data)
+
+
+@dblogin_required
+@json_response
+def ajax_create_table(request, database_name):
+
+    username = request.session.get('username')
+    password = request.session.get('password')
+
+    columns_num = int(request.POST.get('columns_num'))
+    table_name = request.POST.get('table_name')
+    table_comments = request.POST.get('tbl_comments')
+    table_storage = request.POST.get('tbl_storage_engine')
+    table_collation = request.POST.get('tbl_collation')
+
+    columns = list()
+    for i in range(columns_num):
+        name = request.POST.get('field_name[' + str(i) + ']')
+        if name:
+            column = dict(
+                name=name,
+                type=request.POST.get('field_type[' + str(i) + ']'),
+                length=request.POST.get('field_length[' + str(i) + ']'),
+                default_type=request.POST.get('field_default_type[' + str(i) + ']'),
+                default_value=request.POST.get('field_default_value[' + str(i) + ']'),
+                collation=request.POST.get('field_collation[' + str(i) + ']'),
+                attribute=request.POST.get('field_attribute[' + str(i) + ']'),
+                null=request.POST.get('field_null[' + str(i) + ']'),
+                key=request.POST.get('field_key[' + str(i) + ']'),
+                extra=request.POST.get('field_extra[' + str(i) + ']'),
+                comments=request.POST.get('field_comments[' + str(i) + ']'),
+            )
+            columns.append(column)
+    table_info = dict(
+        name=table_name,
+        comments=table_comments,
+        storage=table_storage,
+        collation=table_collation,
+        columns=columns,
+    )
+
+    db = Database(username, password, database_name)
+    return db.create_table(table_info)
 
 
 @dblogin_required

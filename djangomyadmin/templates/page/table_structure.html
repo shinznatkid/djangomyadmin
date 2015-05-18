@@ -21,6 +21,7 @@
                         <th>Collation</th>
                         <th>Null</th>
                         <th>Default</th>
+                        <th>Extra</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,6 +37,7 @@
                             <td>{{ column.collation_name|default:'' }}</td>
                             <td>{{ column.is_nullable }}</td>
                             <td>{% if column.is_nullable == 'NO' and not column.column_default %}<i style="color: #555">None</i>{% else %}{{ column.column_default|default_if_none:'<i>NULL</i>' }}{% endif %}</td>
+                            <td>{{ column.extra }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

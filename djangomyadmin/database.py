@@ -90,10 +90,94 @@ class Database(object):
             return new_records
 
     def create_databases(self, database_name, collation=None):
-        if not collation:
-            collation = 'utf8_general_ci'
-
         if database_name not in self.show_databases():
             with self.connection.cursor() as cursor:
-                command = 'CREATE DATABASE IF NOT EXISTS {} COLLATE {}'.format(database_name, collation)
+                if not collation:
+                    command = 'CREATE DATABASE {}'.format(database_name)
+                else:
+                    command = 'CREATE DATABASE {} COLLATE {}'.format(database_name, collation)
                 cursor.execute(command)
+
+    def create_table(self, table_info):
+        if table_info['name'] not in self.show_tables():
+
+            column_definitions = list()
+            primary_key = list()
+            unique_key = list()
+            index_key = list()
+            fulltext = list()
+
+            for column in table_info['columns']:
+                reference_definition = None
+                column_def = '{} {} '.format(column['name'], column['type'])
+                if column['length']:
+                    column_def += '({}) '.format(column['length'])
+
+                if column['attribute']:
+                    if 'CURRENT_TIMESTAMP' in column['attribute']:
+                        reference_definition = '{} '.format(column['attribute'])
+                    else:
+                        column_def += '{} '.format(column['attribute'])
+
+                if any(s in column['type'] for s in ['CHAR', 'TEXT', 'SET', 'ENUM']) and column['collation']:
+                        column_def += 'COLLATE {} '.format(column['collation'])
+
+                if column['null']:
+                    column_def += 'NULL '
+                else:
+                    column_def += 'NOT NULL '
+
+                if column['default_type'] != 'NONE':
+                    if column['default_type'] != 'USER_DEFINED':
+                        column_def += 'DEFAULT {} '.format(column['default_type'])
+                    else:
+                        column_def += 'DEFAULT {} '.format(column['default_value'])
+
+                if column['extra']:
+                    column_def += 'AUTO_INCREMENT '
+
+                if column['comments']:
+                    column_def += 'COMMENT "{}" '.format(column['comments'])
+
+                if reference_definition:
+                    column_def += reference_definition
+
+                column_definitions.append(column_def)
+
+                if column['key'] == 'PRIMARY':
+                    primary_key.append(column['name'])
+                elif column['key'] == 'UNIQUE':
+                    unique_key.append(column['name'])
+                elif column['key'] == 'INDEX':
+                    index_key.append(column['name'])
+                elif column['key'] == 'FULLTEXT':
+                    fulltext.append(column['name'])
+
+            if primary_key:
+                index_def = 'PRIMARY KEY ({})'.format(','.join(primary_key))
+                column_definitions.append(index_def)
+            if unique_key:
+                index_def = 'UNIQUE ({})'.format(','.join(unique_key))
+                column_definitions.append(index_def)
+            if index_key:
+                index_def = 'INDEX ({})'.format(','.join(index_key))
+                column_definitions.append(index_def)
+            if fulltext:
+                index_def = 'FULLTEXT ({})'.format(','.join(fulltext))
+                column_definitions.append(index_def)
+
+            table_options = 'ENGINE={} '.format(table_info['storage'])
+
+            if table_info['collation']:
+                table_options += 'COLLATE={} '.format(table_info['collation'])
+
+            if table_info['comments']:
+                table_options += 'COMMENT="{}" '.format(table_info['comments'])
+
+            command = 'CREATE TABLE {}({}){}'.format(table_info['name'], ','.join(column_definitions), table_options)
+            try:
+                with self.connection.cursor() as cursor:
+                    cursor.execute(command)
+                return dict(success=True)
+            except Exception as ex:
+                return dict(success=False, msg=ex)

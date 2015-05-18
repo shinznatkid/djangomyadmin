@@ -4,7 +4,7 @@
         <div class="col-sm-6">
             <h1>Tables</h1>
         </div>
-        <div class="col-sm-6" style="margin-top: 21px; text-align: right;">
+        <div class="col-sm-6" style="margin-top: 21px; text-align: right;">            
             <form class="form-inline">
                 <div class="form-group">
                     <label class="sr-only" for="createTableName">Name</label>
@@ -12,9 +12,9 @@
                 </div>
                 <div class="form-group">
                     <label class="sr-only" for="columnsTxt">Columns</label>
-                    <input type="text" class="form-control" id="columnsTxt" name="columns" />
+                    <input type="text" class="form-control" id="columnsNum" name="columns" />
                 </div>
-                <button type="submit" class="btn btn-default">Create</button>
+                <button id="createBtn" type="button" class="btn btn-default">Create</button>
             </form>
         </div>
     </div>
@@ -53,5 +53,21 @@
             $('#sidebarBody').html(html);
         });
         setBreadcrumb('{{ database_name}}');
+
+        $('#createBtn').click(function(){
+            table_name = $('#createTableName').val();
+            columns_num = $('#columnsNum').val();
+
+            if(table_name.length > 0 && columns_num >0){
+                var db_url = '{% url 'djangomyadmin.page_create_table' database_name %}?table_name=' + table_name + '&columns_num=' + columns_num;
+                $.get(db_url, function(html){
+                    $('#body').html(html);
+                    $('#body').data('href', db_url);
+                });
+            }
+            else{
+                alert('Incorrect values');
+            }
+        });
     });
 </script>
