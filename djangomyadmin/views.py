@@ -207,7 +207,11 @@ def page_table(request, database_name, table_name):
     count            = db.query('EXPLAIN SELECT * FROM `%s`' % (table_name))[0][8]
     count_str        = str(count)
     if table_engine == 'InnoDB':
-        count_str = '~%d' % count
+        if count < 10000:
+            count = db.query('SELECT COUNT(*) FROM `%s`' % (table_name))[0][0]
+            count_str = str(count)
+        else:
+            count_str = '~%d' % count
 
     nav_current_page = int(math.floor(pos / max_rows)) + 1
     latest_page      = int(math.floor(count / max_rows)) + 1
