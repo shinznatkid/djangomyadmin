@@ -99,7 +99,7 @@ class Database(object):
                 cursor.execute(command)
 
     def create_table(self, table_info):
-        if table_info['name'] not in self.show_tables():
+        if table_info['name'] not in self.show_tables(simple=True):
 
             column_definitions = list()
             primary_key = list()
@@ -183,3 +183,15 @@ class Database(object):
                 return dict(success=False, msg=str(ex))
         else:
             return dict(success=False, msg='This table exist.')
+
+    def drop_table(self, table_name):
+        if table_name in self.show_tables(simple=True):
+            command = 'DROP TABLE {}'.format(table_name)
+            try:
+                with self.connection.cursor() as cursor:
+                    cursor.execute(command)
+                return dict(success=True)
+            except Exception as ex:
+                return dict(success=False, msg=str(ex))
+        else:
+            return dict(success=False, msg='This table does not exist.')

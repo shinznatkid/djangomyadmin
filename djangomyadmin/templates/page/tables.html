@@ -1,5 +1,7 @@
 {% load static %}
 <div class="inner-body">
+    <div class="alertbox">        
+    </div>
     <div class="rows">
         <div class="col-sm-6">
             <h1>Tables</h1>
@@ -36,7 +38,10 @@
                         <tr>
                             <td align="center"><input type="checkbox" name="selected_tbl[]" value="{{ table }}"></td>
                             <td><a href="{% url 'djangomyadmin.page_table' database_name table.table_name %}" data-target="body">{{ table.table_name }}</a></td>
-                            <td></td>
+                            <td>
+                                <a href="#"><span class="glyphicon glyphicon-edit"></span></a> 
+                                <a href="{% url 'djangomyadmin.ajax_delete_table' database_name table.table_name %}"><span class="glyphicon glyphicon-trash"></span></a>
+                            </td>
                             <td>{{ table.engine }}</td>
                             <td>{{ table.table_collation }}</td>
                         </tr>
@@ -46,6 +51,7 @@
         </div>
     </div>
 </div>
+{% block script %}
 <script>
     $(document).ready(function(){
         $('#collationSelect').chosen();
@@ -59,15 +65,30 @@
             columns_num = $('#columnsNum').val();
 
             if(table_name.length > 0 && columns_num >0){
-                var db_url = '{% url 'djangomyadmin.page_create_table' database_name %}?table_name=' + table_name + '&columns_num=' + columns_num;
-                $.get(db_url, function(html){
-                    $('#body').html(html);
-                    $('#body').data('href', db_url);
-                });
+                loadPage('{% url 'djangomyadmin.page_create_table' database_name %}?table_name=' + table_name + '&columns_num=' + columns_num);                
             }
             else{
                 alert('Incorrect values');
             }
         });
+
+        $('a>span.glyphicon-trash').click(function(){            
+            var database_name = '{{ database_name }}';
+            var table_name = $(this).parent().parent().prev().text();
+            var elem = $(this);
+            if(confirm('Drop ' + table_name.toUpperCase() + ' of ' + database_name.toUpperCase() + '?')){
+                $.getJSON($(this).parent().attr('href'), function(data){
+                    console.log(data);
+                    if(data.success){
+                        elem.parent().parent().parent().remove();
+                    }
+                    else{
+                        $('.alertbox').html('<div class="alert alert-danger" role="alert">'+data.msg+'</div>');
+                    }        
+                });
+            }
+            return false;
+        });
     });
 </script>
+{% endblock script %}

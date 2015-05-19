@@ -18,6 +18,14 @@
             $('ol.breadcrumb.menu').append('<li><a href="' + table_url + '" data-target="body">' + table_name + '</a></li>');
         }
     }
+
+    function loadPage(url){    
+        $.get(url, function(html){
+            $('#body').html(html);
+            $('#body').data('href', url);
+        });
+    }
+    
     $(document).ready(function(){
         {% if database_name %}
             var db_url = '{% url 'djangomyadmin.page_tables' database_name %}';

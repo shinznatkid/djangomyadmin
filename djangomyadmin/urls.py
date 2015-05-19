@@ -17,4 +17,5 @@ urlpatterns = patterns('djangomyadmin.views',
     url(r'^sidebar/database/(?P<database_name>[_a-zA-Z0-9]+)/tables/$', 'sidebar_tables', name='djangomyadmin.sidebar_tables'),
 
     url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/create_table/$', 'ajax_create_table', name='djangomyadmin.ajax_create_table'),
+    url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/drop_table/(?P<table_name>[_a-zA-Z0-9]+)/$', 'ajax_delete_table', name='djangomyadmin.ajax_delete_table'),
 )

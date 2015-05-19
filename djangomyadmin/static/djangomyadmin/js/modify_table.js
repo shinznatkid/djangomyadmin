@@ -695,9 +695,3 @@ function validate(){
     
     return error_msg;      
 }
-function loadPage(url){    
-    $.get(url, function(html){
-        $('#body').html(html);
-        $('#body').data('href', url);
-    });
-}
