@@ -180,4 +180,6 @@ class Database(object):
                     cursor.execute(command)
                 return dict(success=True)
             except Exception as ex:
-                return dict(success=False, msg=ex)
+                return dict(success=False, msg=str(ex))
+        else:
+            return dict(success=False, msg='This table exist.')
