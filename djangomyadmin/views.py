@@ -53,7 +53,7 @@ def index(request):
 
     database_name = None
 
-    db = Database(username, password)    
+    db = Database(username, password)
     if request.POST:
         if 'createDatabase' in request.POST:
             database_name = request.POST.get('database_name')
@@ -62,10 +62,10 @@ def index(request):
             if database_name:
                 db = Database(username, password)
                 db.create_databases(database_name, collation)
-    print db.get_collations()
+    print db.get_engines()
     data = {
         'databases': db.show_databases(),
-        'database_name': database_name,        
+        'database_name': database_name,
     }
     return render(request, 'index.html', data)
 
@@ -136,6 +136,7 @@ def page_create_table(request, database_name):
         'table_name': table_name,
         'columns_num': columns_num,
         'collations': db.get_collations(),
+        'engines': db.get_engines(),
     }
     return render(request, 'page/create_table.html', data)
 

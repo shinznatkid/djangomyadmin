@@ -65,7 +65,10 @@ class Database(object):
 
     def get_collations(self):
         return list(Collations.objects.using('schema').all())
-        
+
+    def get_engines(self):
+        return list(Engines.objects.using('schema').exclude(engine__contains='SCHEMA').exclude(support='NO'))
+
     def query(self, q):
         t1 = time.clock()
         with self.connection.cursor() as cursor:

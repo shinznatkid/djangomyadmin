@@ -76,3 +76,18 @@ class Collations(models.Model):
 
     def __str__(self):
         return self.collation_name
+
+class Engines(models.Model):
+    engine = models.CharField(db_column='ENGINE', max_length=64, primary_key=True)
+    support = models.CharField(db_column='SUPPORT', max_length=8)
+    comment = models.CharField(db_column='COMMENT', max_length=80)
+    transactions = models.CharField(db_column='TRANSACTIONS', max_length=3, blank=True, null=True)
+    xa = models.CharField(db_column='XA', max_length=3, blank=True, null=True)
+    savepoints = models.CharField(db_column='SAVEPOINTS', max_length=3, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'ENGINES'                    
+
+    def __str__(self):
+        return self.engine
