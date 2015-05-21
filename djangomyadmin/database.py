@@ -63,6 +63,9 @@ class Database(object):
     def get_columns(self, table_name):
         return list(Columns.objects.using('schema').filter(table_schema=self.database_name, table_name=table_name).all())
 
+    def get_collations(self):
+        return list(Collations.objects.using('schema').all())
+        
     def query(self, q):
         t1 = time.clock()
         with self.connection.cursor() as cursor:

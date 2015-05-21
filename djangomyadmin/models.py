@@ -59,3 +59,20 @@ class Columns(models.Model):
 
     def __str__(self):
         return self.column_name
+
+
+class Collations(models.Model):
+    collation_name = models.CharField(db_column='COLLATION_NAME', max_length=32)
+    character_set_name = models.CharField(db_column='CHARACTER_SET_NAME', max_length=32)
+    collation_id = models.BigIntegerField(db_column='ID')
+    is_default = models.CharField(db_column='IS_DEFAULT', max_length=3)
+    is_compiled = models.CharField(db_column='IS_COMPILED', max_length=3)
+    sortlen = models.BigIntegerField(db_column='SORTLEN')
+
+    class Meta:
+        managed = False
+        db_table = 'COLLATIONS'            
+        ordering = ['collation_name']
+
+    def __str__(self):
+        return self.collation_name
