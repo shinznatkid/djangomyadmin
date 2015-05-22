@@ -300,7 +300,7 @@ class PageScriptsView(AjaxTemplateView):
     def load_all_modules_from_dir(self, dirname):
         from django.conf import settings
         import os.path
-        full_dirname = os.path.join(settings.BASE, dirname)
+        full_dirname = os.path.join(settings.BASE_DIR, dirname)
         modules = []
         for importer, package_name, _ in pkgutil.iter_modules([full_dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
