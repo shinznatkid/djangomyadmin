@@ -94,9 +94,7 @@
 <script>    
     $(document).ready(function(){
         $('#collationSelect').chosen();
-        $.get('{% url "djangomyadmin.sidebar_tables" database_name %}', function(html){
-            $('#sidebarBody').html(html);
-        });
+        
         setBreadcrumb('{{ database_name}}');
         addRows({{columns_num}});
         bindDefaultType();

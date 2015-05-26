@@ -1,0 +1,97 @@
+{% load static %}
+{% regroup collations|dictsort:"character_set_name" by character_set_name as collation_list %}
+
+<div class="inner-body">
+    <div style="display:none;" id='collations_elem'>
+        <select class="form-control" name="field_collation[#]">\
+            <option value=""></option>
+            {% for collation in collation_list %}
+              <optgroup label="{{ collation.grouper }}">
+              {% for item in collation.list %}
+                    <option value="{{ item.collation_name }}">{{ item.collation_name }}</option>
+              {% endfor %} 
+               </optgroup>                              
+            {% endfor %}              
+        </select>
+    </div>
+    <form class="form-inline" method="post" id="createTableForm">
+        {% csrf_token %}        
+        <input type="hidden" name="columns_num" value="{{columns_num}}">
+        <div class="alertbox">            
+        </div>
+                
+        <div class="rows">
+            <div class="col-sm-12">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Length/Values</th>
+                            <th>Default</th>
+                            <th>Collation</th>
+                            <th>Attribute</th>
+                            <th>Null</th>
+                            
+                            <th>AI</th>
+                            <th>Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb_table">                    
+                                           
+                    </tbody>
+                </table>
+            </div>
+        </div>        
+        <button type="submit" name="saveTable" class="btn btn-default">Save</button>
+    </form>
+</div>
+{% block script %}
+<script src="{% static 'djangomyadmin/js/modify_table.js' %}"></script>
+<script>    
+    $(document).ready(function(){
+        $('#collationSelect').chosen();
+        
+        setBreadcrumb('{{ database_name}}', '{{ table_name }}');
+        addRows({{columns|length}});
+        bindDefaultType();
+        $('select[name^="field_key"]').parent().remove();
+        {% for column in columns %}
+            $('input[name="field_old_name[{{forloop.counter0}}]"').val('{{column.column_name}}');
+            $('input[name="field_name[{{forloop.counter0}}]"').val('{{column.column_name}}');
+            $('select[name="field_type[{{forloop.counter0}}]"').val('{{column.data_type|upper}}');
+            {% autoescape off %}
+                $('input[name="field_length[{{forloop.counter0}}]"').val("{{column.length_values}}");
+            {% endautoescape %}
+
+            {% if not column.column_default %}
+                {% if column.is_nullable %}
+                    $('select[name="field_default_type[{{forloop.counter0}}]"').val('NULL').change();                
+                {% else %}                
+                    $('select[name="field_default_type[{{forloop.counter0}}]"').val('NONE');                
+                {% endif %}
+            {% else %}
+                {% if column.column_default == 'CURRENT_TIMESTAMP' %}
+                    $('select[name="field_default_type[{{forloop.counter0}}]"').val('CURRENT_TIMESTAMP');                
+                {% else %}                
+                    $('select[name="field_default_type[{{forloop.counter0}}]"').val('USER_DEFINED').change();  
+                    $('input[name="field_default_value[{{forloop.counter0}}]"').val("{{column.column_default}}");         
+                {% endif %}
+            {% endif %}
+                        
+            $('select[name="field_collation[{{forloop.counter0}}]"').val('{{column.collation_name}}');
+            $('select[name="field_attribute[{{forloop.counter0}}]"').val('{{column.attribute}}');
+            
+            {% if column.is_nullable %}
+                $('input[name="field_null[{{forloop.counter0}}]"').prop('checked', true);
+            {% endif %}
+
+            {% if column.extra == 'auto_increment' %}
+                $('input[name="field_extra[{{forloop.counter0}}]"').prop('checked', true);
+            {% endif %}
+            
+            $('select[name="field_comments[{{forloop.counter0}}]"').val('{{column.column_comment}}');
+        {% endfor %}
+    });
+</script>
+{% endblock script %}

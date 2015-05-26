@@ -39,7 +39,7 @@
                             <td align="center"><input type="checkbox" name="selected_tbl[]" value="{{ table }}"></td>
                             <td><a href="{% url 'djangomyadmin.page_table' database_name table.table_name %}" data-target="body">{{ table.table_name }}</a></td>
                             <td>
-                                <a href="#"><span class="glyphicon glyphicon-edit"></span></a> 
+                                <a href="{% url 'djangomyadmin.page_edit_table' database_name table.table_name %}" data-target="body"><span class="glyphicon glyphicon-edit"></span></a> 
                                 <a href="{% url 'djangomyadmin.ajax_delete_table' database_name table.table_name %}"><span class="glyphicon glyphicon-trash"></span></a>
                             </td>
                             <td>{{ table.engine }}</td>
@@ -88,7 +88,7 @@
                 });
             }
             return false;
-        });
+        });        
     });
 </script>
 {% endblock script %}

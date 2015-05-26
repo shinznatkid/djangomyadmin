@@ -114,14 +114,14 @@ class Database(object):
             fulltext = list()
 
             for column in table_info['columns']:
-                reference_definition = None
+                extra = None
                 column_def = '{} {} '.format(column['name'], column['type'])
                 if column['length']:
                     column_def += '({}) '.format(column['length'])
 
                 if column['attribute']:
                     if 'CURRENT_TIMESTAMP' in column['attribute']:
-                        reference_definition = '{} '.format(column['attribute'])
+                        extra = '{} '.format(column['attribute'])
                     else:
                         column_def += '{} '.format(column['attribute'])
 
@@ -137,10 +137,12 @@ class Database(object):
                     if column['default_type'] != 'USER_DEFINED':
                         column_def += 'DEFAULT {} '.format(column['default_type'])
                     else:
-                        column_def += 'DEFAULT {} '.format(column['default_value'])
+                        column_def += 'DEFAULT \'{}\' '.format(column['default_value'])
 
                 if column['extra']:
-                    column_def += 'AUTO_INCREMENT '
+                    extra = 'AUTO_INCREMENT '
+
+                column_def += extra
 
                 if column['comments']:
                     column_def += 'COMMENT "{}" '.format(column['comments'])

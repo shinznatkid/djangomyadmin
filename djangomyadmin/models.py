@@ -60,6 +60,22 @@ class Columns(models.Model):
     def __str__(self):
         return self.column_name
 
+    @property
+    def attribute(self):
+        if self.extra == 'on update CURRENT_TIMESTAMP':
+            attr = 'on update CURRENT_TIMESTAMP'
+        else:
+            temp = self.column_type.split()
+            if len(temp) > 1:
+                attr = ' '.join(temp).upper()
+            else:
+                attr = ''
+        return attr
+
+    @property
+    def length_values(self):
+        return self.column_type.split()[0][len(self.data_type) + 1:-1].replace('"', '\'')
+
 
 class Collations(models.Model):
     collation_name = models.CharField(db_column='COLLATION_NAME', max_length=32)
@@ -71,11 +87,12 @@ class Collations(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'COLLATIONS'            
+        db_table = 'COLLATIONS'
         ordering = ['collation_name']
 
     def __str__(self):
         return self.collation_name
+
 
 class Engines(models.Model):
     engine = models.CharField(db_column='ENGINE', max_length=64, primary_key=True)
@@ -87,7 +104,7 @@ class Engines(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'ENGINES'                    
+        db_table = 'ENGINES'
 
     def __str__(self):
         return self.engine

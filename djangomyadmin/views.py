@@ -148,13 +148,11 @@ def page_edit_table(request, database_name, table_name):
     password = request.session.get('password')
     db = Database(username, password, database_name)
 
-    columns = db.get_columns(table_name)
-    columns_num = len(columns)
     data = {
         'database_name': database_name,
         'table_name': table_name,
-        'columns_num': columns_num,
-        'columns': columns,
+        'collations': db.get_collations(),
+        'columns': db.get_columns(table_name),
     }
     return render(request, 'page/edit_table.html', data)
 

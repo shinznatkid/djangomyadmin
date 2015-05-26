@@ -2,9 +2,12 @@ var row_no = 0;
     
 function addRows(num_rows){
     var collations = $('#collations_elem').html();
-    console.log(collations);
+    
     var row = '<tr>\
-                    <td><input class="form-control" type="textbox" name="field_name[#]"></td>\
+                    <td>\
+                        <input class="form-control" type="hidden" name="field_old_name[#]">\
+                        <input class="form-control" type="textbox" name="field_name[#]">\
+                    </td>\
                     <td>\
                         <select class="form-control" name="field_type[#]">\
                             <option title="A 4-byte integer, signed range is -2,147,483,648 to 2,147,483,647, unsigned range is 0 to 4,294,967,295">INT</option>\
@@ -118,13 +121,11 @@ function bindDefaultType(){
         }
         else{
             $(this).parent().find('input[name^="field_default_value"]').hide();    
-        }                
-    });
+        }        
 
-    $('select[name^="field_default_type"]').change(function(){
         if($(this).val() == 'NULL'){
             $(this).parent().parent().find('input[name^="field_null"]').prop('checked', true);
-        }
+        }        
     });
     
     $('input[name^="field_null"]').change(function(){
