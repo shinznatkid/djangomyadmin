@@ -103,6 +103,9 @@ class Database(object):
                 else:
                     command = 'CREATE DATABASE {} COLLATE {}'.format(database_name, collation)
                 cursor.execute(command)
+                return dict(success=True)
+        else:
+            return dict(success=False, msg='This database exists.')
 
     def get_column_definition(self, column):
         extra = ''
@@ -198,11 +201,8 @@ class Database(object):
         if table_info['name'] in self.show_tables(simple=True):
 
             column_definitions = list()
-           
 
-            for column in table_info['columns']:
-
-                column_def = self.get_column_definition(column)
+            for column in table_info['columns']:                
                 statement = 'CHANGE COLUMN {} {}'.format(column['old_name'], self.get_column_definition(column))
                 column_definitions.append(statement)                
 

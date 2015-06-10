@@ -5,8 +5,10 @@
             <h1>Databases</h1>
         </div>
         <div class="col-sm-8" style="margin-top: 21px; text-align: right;">
-            <form class="form-inline" method="post" >
+            <form class="form-inline" method="post" id="createDatabaseForm">
                 {% csrf_token %}
+                <div class="alertbox">            
+                </div>
                 <div class="form-group">
                     <label for="createDatabaseName">Create database</label>
                     <input type="text" class="form-control" id="createDatabaseName" name="database_name" placeholder="Database name">
@@ -53,5 +55,21 @@
     $(document).ready(function(){
         $('#collationSelect').chosen();
         setBreadcrumb();
+        $('#createDatabaseForm').on('submit', function( event ) {
+            event.preventDefault();
+            console.log( $( this ).serialize() );            
+            
+            $.post('{% url 'djangomyadmin.ajax_create_database' %}', $(this).serialize(), function(data){
+                console.log(data);
+                if(data.success){                    
+                    var url = '{% url 'djangomyadmin.page_tables' '0' %}'.replace("0", $('#createDatabaseName').val())
+                    loadPage(url);
+                }
+                else{
+                    $('.alertbox').html('<div class="alert alert-danger" role="alert">'+data.msg+'</div>');
+                }                    
+            });                
+            return false;
+        });
     });
 </script>

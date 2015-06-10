@@ -60,20 +60,10 @@ def index(request):
     # if not username:
     #     return redirect('djangomyadmin.login')
 
-    database_name = None
-
     db = Database(username, password)
-    if request.POST:
-        if 'createDatabase' in request.POST:
-            database_name = request.POST.get('database_name')
-            collation = request.POST.get('collation')
 
-            if database_name:
-                db = Database(username, password)
-                db.create_databases(database_name, collation)
     data = {
         'databases': db.show_databases(),
-        'database_name': database_name,
     }
     return render(request, 'index.html', data)
 
@@ -111,14 +101,14 @@ class PageDatabaseView(AjaxTemplateView):
     def dispatch(self, *args, **kwargs):
         username = self.request.session.get('username')
         password = self.request.session.get('password')
-        self.db = Database(username, password)
+        self.db = Database(username, password)        
         return super(PageDatabaseView, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return self.render_to_response(
             self.get_context_data(
                 databases=self.db.show_databases(),
-				collations': db.get_collations(),
+				collations= self.db.get_collations(),
             )
         )
 
@@ -168,7 +158,7 @@ def page_edit_table(request, database_name, table_name):
         'table_name': table_name,
         'collations': db.get_collations(),
         'columns': db.get_columns(table_name),
-    }
+    }    
     return render(request, 'page/edit_table.html', data)
 
 
@@ -325,6 +315,20 @@ class PageScriptsView(AjaxTemplateView):
                     self.get_context_data(success=success,))
         return self.render_to_response(
             self.get_context_data(modules=modules,))
+
+
+@dblogin_required
+@json_response
+def ajax_create_database(request):
+    username = request.session.get('username')
+    password = request.session.get('password')
+    print request.POST
+    database_name = request.POST.get('database_name')
+    collation = request.POST.get('collation')
+
+    if database_name:
+        db = Database(username, password)
+        return db.create_databases(database_name, collation)
 
 
 @dblogin_required
