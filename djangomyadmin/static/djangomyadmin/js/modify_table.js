@@ -418,17 +418,19 @@ function validate(){
 
             
             var attribute = tr.find('select[name^="field_attribute"]').val();
-            if(attribute.match('CURRENT_TIMESTAMP$') && type != 'TIMESTAMP'){
-                error_msg = 'Invalid attribute (' + attribute + ') for ' + type;
-                return;    
-            }               
-            else if(attribute == 'BINARY' && !(type.match('CHAR$') || type.match('TEXT$'))){
-                error_msg = 'Invalid attribute (' + attribute + ') for ' + type;                
-                return;    
-            }
-            else if(attribute.match('^UNSIGNED') && !(type.match('INT') || $.inArray(type, ['REAL', 'DOUBLE', 'FLOAT', 'DECIMAL', 'NUMERIC']) != -1)){
-                error_msg = 'Invalid attribute (' + attribute + ') for ' + type;                
-                return;    
+            if(attribute != null){
+                if(attribute.match('CURRENT_TIMESTAMP$') && type != 'TIMESTAMP'){
+                    error_msg = 'Invalid attribute (' + attribute + ') for ' + type;
+                    return;    
+                }               
+                else if(attribute == 'BINARY' && !(type.match('CHAR$') || type.match('TEXT$'))){
+                    error_msg = 'Invalid attribute (' + attribute + ') for ' + type;                
+                    return;    
+                }
+                else if(attribute.match('^UNSIGNED') && !(type.match('INT') || $.inArray(type, ['REAL', 'DOUBLE', 'FLOAT', 'DECIMAL', 'NUMERIC']) != -1)){
+                    error_msg = 'Invalid attribute (' + attribute + ') for ' + type;                
+                    return;    
+                }
             }
         }
     });     

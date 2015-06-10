@@ -14,8 +14,9 @@
             {% endfor %}              
         </select>
     </div>
-    <form class="form-inline" method="post" id="createTableForm">
+    <form class="form-inline" method="post" id="modifyTableForm">
         {% csrf_token %}        
+        <input type="hidden" name="table_name" value="{{table_name}}">
         <input type="hidden" name="columns_num" value="{{columns_num}}">
         <div class="alertbox">            
         </div>
@@ -92,6 +93,27 @@
             
             $('select[name="field_comments[{{forloop.counter0}}]"').val('{{column.column_comment}}');
         {% endfor %}
+
+        $('#modifyTableForm').on('submit', function( event ) {
+            event.preventDefault();
+            console.log( $( this ).serialize() );
+            error_msg = validate();
+            if(!error_msg){
+                $.post('{% url 'djangomyadmin.ajax_modify_table' database_name table_name %}', $(this).serialize(), function(data){
+                    console.log(data);
+                    if(data.success){
+                        loadPage('{% url 'djangomyadmin.page_table_structure' database_name table_name %}');
+                    }
+                    else{
+                        $('.alertbox').html('<div class="alert alert-danger" role="alert">'+data.msg+'</div>');
+                    }                    
+                });
+            }
+            else{
+                $('.alertbox').html('<div class="alert alert-warning" role="alert">'+error_msg+'</div>');
+            }
+            return false;
+        });
     });
 </script>
 {% endblock script %}

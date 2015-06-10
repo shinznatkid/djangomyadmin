@@ -19,5 +19,6 @@ urlpatterns = patterns('djangomyadmin.views',
     url(r'^page/database/(?P<database_name>[_a-zA-Z0-9]+)/table/(?P<table_name>[_a-zA-Z0-9]+)/edit/$', 'page_edit_table', name='djangomyadmin.page_edit_table'),
     
     url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/create_table/$', 'ajax_create_table', name='djangomyadmin.ajax_create_table'),
+    url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/modify_table/(?P<table_name>[_a-zA-Z0-9]+)/$', 'ajax_modify_table', name='djangomyadmin.ajax_modify_table'),
     url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/drop_table/(?P<table_name>[_a-zA-Z0-9]+)/$', 'ajax_delete_table', name='djangomyadmin.ajax_delete_table'),
 )

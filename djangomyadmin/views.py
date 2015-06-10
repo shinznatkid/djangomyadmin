@@ -255,6 +255,43 @@ def ajax_create_table(request, database_name):
 
 @dblogin_required
 @json_response
+def ajax_modify_table(request, database_name, table_name):
+
+    username = request.session.get('username')
+    password = request.session.get('password')
+
+    columns_num = int(request.POST.get('columns_num')) 
+
+    columns = list()
+    for i in range(columns_num):
+        name = request.POST.get('field_name[' + str(i) + ']')
+        if name:
+            column = dict(
+                name=name,
+                old_name=request.POST.get('field_old_name[' + str(i) + ']'),
+                type=request.POST.get('field_type[' + str(i) + ']'),
+                length=request.POST.get('field_length[' + str(i) + ']'),
+                default_type=request.POST.get('field_default_type[' + str(i) + ']'),
+                default_value=request.POST.get('field_default_value[' + str(i) + ']'),
+                collation=request.POST.get('field_collation[' + str(i) + ']'),
+                attribute=request.POST.get('field_attribute[' + str(i) + ']'),
+                null=request.POST.get('field_null[' + str(i) + ']'),
+                key=request.POST.get('field_key[' + str(i) + ']'),
+                extra=request.POST.get('field_extra[' + str(i) + ']'),
+                comments=request.POST.get('field_comments[' + str(i) + ']'),
+            )
+            columns.append(column)
+    table_info = dict(
+        name=table_name,        
+        columns=columns,
+    )
+
+    db = Database(username, password, database_name)
+    return db.modify_table(table_info)
+
+
+@dblogin_required
+@json_response
 def ajax_delete_table(request, database_name, table_name):
 
     username = request.session.get('username')

@@ -104,6 +104,42 @@ class Database(object):
                     command = 'CREATE DATABASE {} COLLATE {}'.format(database_name, collation)
                 cursor.execute(command)
 
+    def get_column_definition(self, column):
+        extra = ''
+        column_def = '{} {} '.format(column['name'], column['type'])
+        if column['length']:
+            column_def += '({}) '.format(column['length'])
+
+        if column['attribute']:
+            if 'CURRENT_TIMESTAMP' in column['attribute']:
+                extra = '{} '.format(column['attribute'])
+            else:
+                column_def += '{} '.format(column['attribute'])
+
+        if any(s in column['type'] for s in ['CHAR', 'TEXT', 'SET', 'ENUM']) and column['collation']:
+                column_def += 'COLLATE {} '.format(column['collation'])
+
+        if column['null']:
+            column_def += 'NULL '
+        else:
+            column_def += 'NOT NULL '
+
+        if column['default_type'] != 'NONE':
+            if column['default_type'] != 'USER_DEFINED':
+                column_def += 'DEFAULT {} '.format(column['default_type'])
+            else:
+                column_def += 'DEFAULT \'{}\' '.format(column['default_value'])
+
+        if column['extra']:
+            extra = 'AUTO_INCREMENT '
+
+        column_def += extra
+
+        if column['comments']:
+            column_def += 'COMMENT "{}" '.format(column['comments'])
+
+        return column_def
+
     def create_table(self, table_info):
         if table_info['name'] not in self.show_tables(simple=True):
 
@@ -114,42 +150,8 @@ class Database(object):
             fulltext = list()
 
             for column in table_info['columns']:
-                extra = None
-                column_def = '{} {} '.format(column['name'], column['type'])
-                if column['length']:
-                    column_def += '({}) '.format(column['length'])
 
-                if column['attribute']:
-                    if 'CURRENT_TIMESTAMP' in column['attribute']:
-                        extra = '{} '.format(column['attribute'])
-                    else:
-                        column_def += '{} '.format(column['attribute'])
-
-                if any(s in column['type'] for s in ['CHAR', 'TEXT', 'SET', 'ENUM']) and column['collation']:
-                        column_def += 'COLLATE {} '.format(column['collation'])
-
-                if column['null']:
-                    column_def += 'NULL '
-                else:
-                    column_def += 'NOT NULL '
-
-                if column['default_type'] != 'NONE':
-                    if column['default_type'] != 'USER_DEFINED':
-                        column_def += 'DEFAULT {} '.format(column['default_type'])
-                    else:
-                        column_def += 'DEFAULT \'{}\' '.format(column['default_value'])
-
-                if column['extra']:
-                    extra = 'AUTO_INCREMENT '
-
-                column_def += extra
-
-                if column['comments']:
-                    column_def += 'COMMENT "{}" '.format(column['comments'])
-
-                if reference_definition:
-                    column_def += reference_definition
-
+                column_def = self.get_column_definition(column)
                 column_definitions.append(column_def)
 
                 if column['key'] == 'PRIMARY':
@@ -191,6 +193,29 @@ class Database(object):
                 return dict(success=False, msg=str(ex))
         else:
             return dict(success=False, msg='This table exist.')
+
+    def modify_table(self, table_info):
+        if table_info['name'] in self.show_tables(simple=True):
+
+            column_definitions = list()
+           
+
+            for column in table_info['columns']:
+
+                column_def = self.get_column_definition(column)
+                statement = 'CHANGE COLUMN {} {}'.format(column['old_name'], self.get_column_definition(column))
+                column_definitions.append(statement)                
+
+            command = 'ALTER TABLE {} {}'.format(table_info['name'], ','.join(column_definitions))
+            print command
+            try:
+                with self.connection.cursor() as cursor:
+                    cursor.execute(command)
+                return dict(success=True)
+            except Exception as ex:
+                return dict(success=False, msg=str(ex))
+        else:
+            return dict(success=False, msg='This table does not exist.')
 
     def drop_table(self, table_name):
         if table_name in self.show_tables(simple=True):
