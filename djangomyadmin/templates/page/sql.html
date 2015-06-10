@@ -24,6 +24,30 @@
             </div>
         </div>
     </div>
+
+    <div class="rows">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form class="form-inline">
+                        {% if nav_first_page != None %}
+                            <a href="{{ current_url }}?pos={{ nav_first_page }}" class="btn btn-default" data-target="body">&lt;&lt;</a>
+                        {% endif %} 
+                        {% if nav_prev_page != None %}
+                            <a href="{{ current_url }}?pos={{ nav_prev_page }}" class="btn btn-default" data-target="body">&lt;</a>
+                        {% endif %} 
+                        <input type="text" value="{{ nav_current_page }}" class="page-number form-control">
+                        {% if nav_next_page != None %}
+                            <a href="{{ current_url }}?pos={{ nav_next_page }}" class="btn btn-default" data-target="body">&gt;</a>
+                        {% endif %} 
+                        {% if nav_last_page != None %}
+                            <a href="{{ current_url }}?pos={{ nav_last_page }}" class="btn btn-default" data-target="body">&gt;&gt;</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="rows">
         <div class="col-sm-12">

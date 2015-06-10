@@ -1,20 +1,21 @@
 {% extends "dmabase.html" %}
 {% block container %}
 <div id="body" class="container-fluid">
-
+{% if template_ajax_name %}{% include template_ajax_name %}{% endif %}
 </div>
 {% endblock container %}
 {% block script %}
 <script>
+    var page_tables_url = '{% url "djangomyadmin.page_tables" "0" %}';
     function setBreadcrumb(database_name, table_name) {
         $('ol.breadcrumb.menu li').remove();
         $('ol.breadcrumb.menu').append('<li><a href="{% url "djangomyadmin.index" %}" data-target="body">Home</a></li>');
         if(database_name !== undefined) {
-            var url = '{% url "djangomyadmin.page_tables" "0" %}'.replace('0', database_name);
+            var url = page_tables_url.replace('0', database_name);
             $('ol.breadcrumb.menu').append('<li><a href="' + url + '" data-target="body">' + database_name + '</a></li>');
         }
         if(table_name !== undefined) {
-            var table_url = '{% url "djangomyadmin.page_tables" "0" %}'.replace('0', table_name);
+            var table_url = page_tables_url.replace('0', table_name);
             $('ol.breadcrumb.menu').append('<li><a href="' + table_url + '" data-target="body">' + table_name + '</a></li>');
         }
     }
@@ -27,15 +28,23 @@
     }
     
     $(document).ready(function(){
-        {% if database_name %}
-            var db_url = '{% url 'djangomyadmin.page_tables' database_name %}';
-        {% else %}
-            var db_url = '{% url "djangomyadmin.page_databases" %}';
-        {% endif %}
-        $.get(db_url, function(html){
+        // {% if database_name %}
+        //     var db_url = '{% url 'djangomyadmin.page_tables' database_name %}';
+        // {% else %}
+        //     var db_url = '{% url "djangomyadmin.page_databases" %}';
+        // {% endif %}
+        // $.get(db_url, function(html){
+        //     $('#body').html(html);
+        //     $('#body').data('href', db_url);
+        // });
+
+        {% if not template_ajax_name %}
+        var script_url = '{% url "djangomyadmin.page_scripts" %}';
+        $.get(script_url, function(html){
             $('#body').html(html);
-            $('#body').data('href', db_url);
+            $('#body').data('href', script_url);
         });
+        {% endif %}
         $(document).on('click', 'a[data-target]', function(){
             var target = $(this).data('target');
             var href = $(this).attr('href');

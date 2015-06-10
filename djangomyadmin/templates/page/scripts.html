@@ -1,0 +1,33 @@
+{% load static %}
+{% load bootstrap3 %}
+<div class="inner-body">
+    <div class="rows">
+        {% for module in modules %}
+            <div class="col-lg-6 col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ module }}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form action="{% url 'djangomyadmin.page_scripts' %}" class="form-horizontal" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="module_name" value="{{ module.name }}">
+                            {% bootstrap_form module.entity layout='horizontal' %}
+                            <div class="form-group">
+                                <div class="col-md-offset-3 col-md-9">
+                                    <button type="submit" class="btn btn-default">Go</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('#collationSelect').chosen();
+        setBreadcrumb();
+    });
+</script>

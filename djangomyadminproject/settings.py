@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'djangomyadmin',
     'picker',
+    'bootstrap3',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -89,6 +90,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
 PICKER_INSTALLED_APPS = (
     'jquery',
