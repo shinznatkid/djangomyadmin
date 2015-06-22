@@ -153,11 +153,22 @@ def page_edit_table(request, database_name, table_name):
     password = request.session.get('password')
     db = Database(username, password, database_name)
 
+    columns = db.get_columns(table_name)
+    selected_columns = list()
+    column_names = request.GET.get('name')
+    if column_names:
+        column_names = column_names.split(',')
+        for column in columns:
+            if column.column_name in column_names:
+                selected_columns.append(column)
+    else:
+        selected_columns = columns
+
     data = {
         'database_name': database_name,
         'table_name': table_name,
         'collations': db.get_collations(),
-        'columns': db.get_columns(table_name),
+        'columns': selected_columns,
     }    
     return render(request, 'page/edit_table.html', data)
 
@@ -381,7 +392,7 @@ def ajax_modify_table(request, database_name, table_name):
     username = request.session.get('username')
     password = request.session.get('password')
 
-    columns_num = int(request.POST.get('columns_num')) 
+    columns_num = int(request.POST.get('columns_num'))
 
     columns = list()
     for i in range(columns_num):
@@ -403,7 +414,7 @@ def ajax_modify_table(request, database_name, table_name):
             )
             columns.append(column)
     table_info = dict(
-        name=table_name,        
+        name=table_name,
         columns=columns,
     )
 
@@ -420,3 +431,14 @@ def ajax_delete_table(request, database_name, table_name):
 
     db = Database(username, password, database_name)
     return db.drop_table(table_name)
+
+
+@dblogin_required
+@json_response
+def ajax_delete_column(request, database_name, table_name, column_name):
+
+    username = request.session.get('username')
+    password = request.session.get('password')
+
+    db = Database(username, password, database_name)
+    return db.drop_column(table_name, column_name)

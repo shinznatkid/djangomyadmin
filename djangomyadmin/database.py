@@ -228,3 +228,19 @@ class Database(object):
                 return dict(success=False, msg=str(ex))
         else:
             return dict(success=False, msg='This table does not exist.')
+
+    def drop_column(self, table_name, column_name):
+        if table_name in self.show_tables(simple=True):
+            if column_name in [x.column_name for x in self.get_columns(table_name)]:
+
+                command = 'ALTER TABLE {} DROP COLUMN {}'.format(table_name, column_name)
+                try:
+                    with self.connection.cursor() as cursor:
+                        cursor.execute(command)
+                    return dict(success=True)
+                except Exception as ex:
+                    return dict(success=False, msg=str(ex))
+            else:
+                return dict(success=False, msg='This column does not exist.')
+        else:
+            return dict(success=False, msg='This table does not exist.')

@@ -64,9 +64,9 @@
             {% autoescape off %}
                 $('input[name="field_length[{{forloop.counter0}}]"').val("{{column.length_values}}");
             {% endautoescape %}
-
+        
             {% if not column.column_default %}
-                {% if column.is_nullable %}
+                {% if column.is_nullable != 'NO' %}
                     $('select[name="field_default_type[{{forloop.counter0}}]"').val('NULL').change();                
                 {% else %}                
                     $('select[name="field_default_type[{{forloop.counter0}}]"').val('NONE');                

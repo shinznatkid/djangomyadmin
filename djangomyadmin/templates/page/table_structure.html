@@ -9,7 +9,8 @@
     </ul>
 </div>
 <div class="inner-body">
-    
+    <div class="alertbox">        
+    </div>
     <div class="rows">
         <div class="col-sm-12">
             <table class="table table-bordered table-striped table-hover">
@@ -29,8 +30,8 @@
                         <tr>
                             <td align="center">
                                 <input type="checkbox" name="selected_tbl[]"> 
-                                <a href="#"><span class="glyphicon glyphicon-edit"></span></a> 
-                                <a href="#"><span class="glyphicon glyphicon-trash"></span></a>
+                                <a href="{% url 'djangomyadmin.page_edit_table' database_name table_name %}?name={{column.column_name}}" data-target="body"><span class="glyphicon glyphicon-edit"></span></a> 
+                                <a href="{% url 'djangomyadmin.ajax_delete_column' database_name table_name column.column_name%}"><span class="glyphicon glyphicon-trash"></span></a>
                             </td>
                             <td>{{ column }}</td>
                             <td>{{ column.column_type }}</td>
@@ -49,5 +50,23 @@
     $(document).ready(function(){
         $('#collationSelect').chosen();
         setBreadcrumb('{{ database_name}}', '{{ table_name }}');
+
+        $('a>span.glyphicon-trash').click(function(){            
+            var table_name = '{{ table_name }}';
+            var column_name = $(this).parent().parent().next().text();
+            var elem = $(this);
+            if(confirm('Drop ' + column_name.toUpperCase() + ' of ' + table_name.toUpperCase() + '?')){
+                $.getJSON($(this).parent().attr('href'), function(data){
+                    console.log(data);
+                    if(data.success){
+                        elem.parent().parent().parent().remove();
+                    }
+                    else{
+                        $('.alertbox').html('<div class="alert alert-danger" role="alert">'+data.msg+'</div>');
+                    }        
+                });
+            }
+            return false;
+        });       
     });
 </script>

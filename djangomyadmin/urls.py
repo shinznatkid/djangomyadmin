@@ -19,5 +19,6 @@ urlpatterns = (
     url(r'^ajax/create_database/$', views.ajax_create_database, name='djangomyadmin.ajax_create_database'),
     url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/create_table/$', views.ajax_create_table, name='djangomyadmin.ajax_create_table'),
     url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/modify_table/(?P<table_name>[_a-zA-Z0-9]+)/$', views.ajax_modify_table, name='djangomyadmin.ajax_modify_table'),
-    url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/drop_table/(?P<table_name>[_a-zA-Z0-9]+)/$', views.ajax_delete_table, name='djangomyadmin.ajax_delete_table'),
+    url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/drop/(?P<table_name>[_a-zA-Z0-9]+)/$', views.ajax_delete_table, name='djangomyadmin.ajax_delete_table'),
+    url(r'^ajax/(?P<database_name>[_a-zA-Z0-9]+)/drop/(?P<table_name>[_a-zA-Z0-9]+)/column/(?P<column_name>[_a-zA-Z0-9]+)/$', views.ajax_delete_column, name='djangomyadmin.ajax_delete_column'),
 )
